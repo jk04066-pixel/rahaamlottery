@@ -851,5 +851,26 @@ function resetAll() {
   document.getElementById('resultsGrid').innerHTML = '';
 }
 </script>
+
+  <!-- BGM -->
+  <audio id="bgm" src="사다리타기_BGM.mp3" preload="auto"></audio>
+<script>
+(function() {
+  const audio = document.getElementById("bgm");
+  const START = 1, END = 12;
+  function tryPlay() { audio.currentTime = START; audio.play().catch(()=>{}); }
+  audio.addEventListener("timeupdate", function() {
+    if (audio.currentTime >= END) audio.currentTime = START;
+  });
+  document.addEventListener("DOMContentLoaded", function() {
+    audio.currentTime = START;
+    audio.play().catch(function() {
+      const go = function() { tryPlay(); document.removeEventListener("click",go); document.removeEventListener("touchstart",go); };
+      document.addEventListener("click", go);
+      document.addEventListener("touchstart", go);
+    });
+  });
+})();
+</script>
 </body>
 </html>
