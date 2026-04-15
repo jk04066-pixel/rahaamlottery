@@ -138,14 +138,14 @@
   .btn-draw:disabled { opacity:0.4; cursor:not-allowed; }
 
   /* ══════════════════════════════════
-     슬롯 오버레이
+     슬롯 오버레이  (z-index 최상위)
   ══════════════════════════════════ */
   #slotOverlay {
     display:none;
     position:fixed; inset:0;
-    background:rgba(4,4,10,0.93);
-    z-index:999;
-    align-items:center; justify-content:center; flex-direction:column; gap:18px;
+    background:rgba(4,4,10,0.94);
+    z-index:100000;               /* 최상위 */
+    align-items:center; justify-content:center; flex-direction:column; gap:20px;
   }
   #slotOverlay.active { display:flex; }
 
@@ -157,80 +157,88 @@
 
   .slot-prize-name {
     font-family:'Noto Sans KR',sans-serif;
-    font-size:clamp(15px,3vw,22px);
+    font-size:clamp(16px,3vw,24px);
     color:var(--accent); font-weight:700; letter-spacing:1px;
   }
 
   /* 슬롯 창 */
   .slot-window {
     position:relative;
-    width:min(280px,78vw); height:132px;
+    width:min(300px,82vw);
+    height:140px;          /* 아이템 높이(60px) × 2 + 여유 20px */
     overflow:hidden;
     background:#000;
     border:2px solid var(--accent);
-    box-shadow:0 0 70px rgba(240,192,64,0.35), inset 0 0 30px rgba(0,0,0,0.8);
+    border-radius:4px;
+    box-shadow:0 0 80px rgba(240,192,64,0.45), inset 0 0 40px rgba(0,0,0,0.9);
   }
 
-  /* 위아래 마스크 */
-  .slot-window::before, .slot-window::after {
-    content:''; position:absolute; left:0; right:0; height:40px; z-index:2; pointer-events:none;
+  /* 위아래 페이드 마스크 (z-index 높게) */
+  .slot-mask-top, .slot-mask-bot {
+    position:absolute; left:0; right:0; height:44px;
+    pointer-events:none; z-index:4;
   }
-  .slot-window::before { top:0;    background:linear-gradient(to bottom,#000 0%,transparent 100%); }
-  .slot-window::after  { bottom:0; background:linear-gradient(to top,   #000 0%,transparent 100%); }
+  .slot-mask-top { top:0;    background:linear-gradient(to bottom, #000 0%, transparent 100%); }
+  .slot-mask-bot { bottom:0; background:linear-gradient(to top,    #000 0%, transparent 100%); }
 
-  /* 가운데 선 */
+  /* 가운데 하이라이트 */
   .slot-hl {
-    position:absolute; top:50%; left:0; right:0; transform:translateY(-50%);
-    height:48px;
-    border-top:1px solid rgba(240,192,64,0.6);
-    border-bottom:1px solid rgba(240,192,64,0.6);
-    background:rgba(240,192,64,0.05);
+    position:absolute; top:50%; left:0; right:0;
+    transform:translateY(-50%);
+    height:60px;
+    border-top:1px solid rgba(240,192,64,0.55);
+    border-bottom:1px solid rgba(240,192,64,0.55);
+    background:rgba(240,192,64,0.04);
     z-index:3; pointer-events:none;
   }
 
-  /* 드럼 */
+  /* 드럼 트랙 — translateY 로 스크롤 */
   #slotDrum {
-    position:absolute; left:0; right:0;
+    position:absolute;
+    left:0; right:0; top:0;
     display:flex; flex-direction:column; align-items:center;
+    will-change:transform;
   }
 
-  .slot-num {
-    height:44px; line-height:44px;
+  .slot-item {
+    height:60px; line-height:60px;
     font-family:'JetBrains Mono',monospace;
-    font-size:clamp(26px,7vw,42px); font-weight:700;
+    font-size:clamp(30px,8vw,48px); font-weight:700;
     color:var(--text); text-align:center; width:100%; flex-shrink:0;
+    user-select:none;
   }
 
-  /* 확정 애니메이션 */
+  /* 확정 숫자 — 짜잔! */
   @keyframes smash {
-    0%   { transform:scale(2.2) rotate(-4deg); opacity:0; filter:blur(10px); }
-    30%  { transform:scale(0.88) rotate(1deg); opacity:1; filter:blur(0); }
-    55%  { transform:scale(1.12) rotate(-1deg); }
-    75%  { transform:scale(0.97); }
+    0%   { transform:scale(2.4) rotate(-5deg); opacity:0; filter:blur(12px); }
+    28%  { transform:scale(0.86) rotate(2deg);  opacity:1; filter:blur(0); }
+    52%  { transform:scale(1.14) rotate(-1deg); }
+    72%  { transform:scale(0.96); }
+    88%  { transform:scale(1.04); }
     100% { transform:scale(1) rotate(0deg); }
   }
-  .slot-num.locked {
-    animation:smash 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+  .slot-item.locked {
+    animation:smash 0.65s cubic-bezier(0.22,1,0.36,1) forwards;
     color:#000 !important;
     background:var(--accent);
     border-radius:6px;
-    box-shadow:0 0 50px rgba(240,192,64,1), 0 0 100px rgba(240,192,64,0.5);
-    position:relative; z-index:10;
+    box-shadow:0 0 60px rgba(240,192,64,1), 0 0 120px rgba(240,192,64,0.6);
+    z-index:10; position:relative;
   }
 
-  /* 화면 플래시 */
+  /* 화면 플래시 (z-index 최상위+1) */
   @keyframes flashScreen {
-    0%   { opacity:0.55; }
+    0%   { opacity:0.6; }
     100% { opacity:0; }
   }
   #flashLayer {
     position:fixed; inset:0; background:#fff;
-    opacity:0; pointer-events:none; z-index:9999;
+    opacity:0; pointer-events:none; z-index:100001;
   }
-  #flashLayer.flash { animation:flashScreen 0.4s ease-out forwards; }
+  #flashLayer.flash { animation:flashScreen 0.35s ease-out forwards; }
 
-  /* 파티클 */
-  #particles { position:fixed; inset:0; pointer-events:none; z-index:1000; overflow:hidden; }
+  /* 파티클 (오버레이 위) */
+  #particles { position:fixed; inset:0; pointer-events:none; z-index:100002; overflow:hidden; }
   .particle {
     position:absolute; border-radius:50%;
     animation:pfly 1s ease-out forwards;
@@ -330,9 +338,11 @@
   <div class="slot-prize-name" id="slotPrizeName"></div>
   <div class="slot-window">
     <div class="slot-hl"></div>
+    <div class="slot-mask-top"></div>
+    <div class="slot-mask-bot"></div>
     <div id="slotDrum"></div>
   </div>
-  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);opacity:0.5;margin-top:4px;" id="slotSub"></div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);opacity:0.45;margin-top:6px;" id="slotSub"></div>
 </div>
 
 <!-- 화면 플래시 -->
@@ -414,6 +424,7 @@
 </div>
 
 <audio id="bgm" src="사다리타기_BGM.mp3" preload="auto"></audio>
+<audio id="sfxTada" src="짜잔.mp3" preload="auto"></audio>
 
 <script>
 // ── 시계 ──
@@ -535,63 +546,76 @@ function spawnParticles(){
 async function slotReveal(picked, prize, drawIndex, randInfo, maxNum){
   const overlay = document.getElementById('slotOverlay');
   const drum    = document.getElementById('slotDrum');
+  const ITEM_H  = 60; // .slot-item height (px)
+  const WIN_H   = 140; // .slot-window height
+  // 중앙 정렬: 창 중앙에 아이템 중심이 오려면 top offset = (WIN_H - ITEM_H) / 2
+  const CENTER_OFFSET = (WIN_H - ITEM_H) / 2; // 40px
 
-  document.getElementById('slotLabel').textContent   = `${drawIndex}번째 추첨`;
+  document.getElementById('slotLabel').textContent    = `${drawIndex}번째 추첨`;
   document.getElementById('slotPrizeName').textContent = `🎁 ${prize}`;
-  document.getElementById('slotSub').textContent      = randInfo;
-
-  drum.innerHTML='';
-  drum.style.paddingTop='44px'; // 3-row 드럼, 중앙이 창 정중앙에
+  document.getElementById('slotSub').textContent       = randInfo;
   overlay.classList.add('active');
 
-  // 숫자 3개짜리 드럼 세팅
-  function setDrum(center, dimOpacity=0.3){
-    const a=Math.floor(Math.random()*maxNum)+1;
-    const b=Math.floor(Math.random()*maxNum)+1;
-    drum.innerHTML=`
-      <div class="slot-num" style="opacity:${dimOpacity}">${a}</div>
-      <div class="slot-num" id="drumCenter">${center}</div>
-      <div class="slot-num" style="opacity:${dimOpacity}">${b}</div>`;
-  }
+  // ── 드럼 숫자 리스트 생성 ──
+  // 긴 랜덤 숫자 스트립 + 끝에 picked 배치
+  const STRIP = 60; // 스크롤할 아이템 수
+  const nums  = [];
+  for(let i=0;i<STRIP;i++) nums.push(Math.floor(Math.random()*maxNum)+1);
+  nums.push(picked); // 마지막이 정답
 
-  // 드럼롤 페이즈 [인터벌ms, 횟수]
-  const phases=[
-    [25, 20],   // 극고속
-    [45, 14],   // 고속
-    [75, 10],   // 중속
-    [120, 7],   // 감속
-    [180, 5],   // 느림
-    [260, 4],   // 매우 느림
-    [360, 3],   // 거의 멈춤
-    [480, 2],   // 마지막 떨림
-  ];
+  // DOM 생성
+  drum.innerHTML = nums.map((n,i)=>
+    `<div class="slot-item" data-idx="${i}">${n}</div>`
+  ).join('');
+  drum.style.transition = 'none';
+  drum.style.transform  = `translateY(${CENTER_OFFSET}px)`; // 첫 아이템이 중앙
 
-  for(const [interval, count] of phases){
-    for(let k=0;k<count;k++){
-      setDrum(Math.floor(Math.random()*maxNum)+1);
-      await sleep(interval);
+  await sleep(30); // paint
+
+  // ── easing 함수 ──
+  // 각 스텝의 스크롤 속도 (easeIn → 최고속 → easeOut 강하게)
+  function buildSchedule(totalItems){
+    // 반환: [duration_ms] 배열 (각 아이템으로 이동하는 트랜지션 시간)
+    const out = [];
+    for(let i=0;i<totalItems;i++){
+      const t = i / (totalItems - 1); // 0 → 1
+      let dur;
+      if(t < 0.15)      dur = 40 - t/0.15 * 25;   // 40→15 가속
+      else if(t < 0.55) dur = 15;                   // 최고속 유지
+      else if(t < 0.80) dur = 15 + ((t-0.55)/0.25)*80;  // 15→95 감속
+      else              dur = 95 + ((t-0.80)/0.20)*220;  // 95→315 급감속
+      out.push(Math.round(dur));
     }
+    return out;
   }
 
-  // ── 확정 ──
-  // 마지막 1회: picked 숫자 보일 듯 말 듯 잠깐
-  setDrum(picked, 0.2);
-  await sleep(80);
-  setDrum(Math.floor(Math.random()*maxNum)+1);
-  await sleep(120);
-  setDrum(picked, 0.2);
-  await sleep(100);
+  const schedule = buildSchedule(STRIP + 1);
 
-  // 최종 확정 잠금
-  setDrum(picked, 0.15);
-  const center = document.getElementById('drumCenter');
-  center.classList.add('locked');
+  // ── 애니메이션 루프 ──
+  for(let i=0;i<=STRIP;i++){
+    const targetY = CENTER_OFFSET - i * ITEM_H;
+    drum.style.transition = `transform ${schedule[i]}ms linear`;
+    drum.style.transform  = `translateY(${targetY}px)`;
+    await sleep(schedule[i]);
+  }
 
-  // 동시에 플래시 + 파티클
+  // 완전 정지 (마지막 아이템 = picked)
+  drum.style.transition = 'none';
+
+  // ── 짜잔 확정 애니메이션 ──
+  await sleep(60);
+  const lastItem = drum.querySelector(`.slot-item[data-idx="${STRIP}"]`);
+  if(lastItem) lastItem.classList.add('locked');
+
+  // 짜잔 효과음
+  const tada = document.getElementById('sfxTada');
+  tada.currentTime = 0;
+  tada.play().catch(()=>{});
+
   flash();
   spawnParticles();
 
-  await sleep(1000);
+  await sleep(1050);
   overlay.classList.remove('active');
 }
 
