@@ -437,17 +437,41 @@ updateClock(); setInterval(updateClock, 1000);
 
 // ── BGM ──
 (function(){
-  const a=document.getElementById('bgm'), S=1, E=12;
-  function play(){ a.currentTime=S; a.play().catch(()=>{}); }
-  a.addEventListener('timeupdate',()=>{ if(a.currentTime>=E) a.currentTime=S; });
-  document.addEventListener('DOMContentLoaded',()=>{
-    a.currentTime=S;
-    a.play().catch(()=>{
-      const go=()=>{ play(); document.removeEventListener('click',go); document.removeEventListener('touchstart',go); };
-      document.addEventListener('click',go);
-      document.addEventListener('touchstart',go);
-    });
+  const a = document.getElementById('bgm');
+  const S = 1, E = 12;
+  a.volume = 1.0;
+
+  function startBGM(){
+    a.currentTime = S;
+    a.play().catch(()=>{});
+  }
+
+  // 구간 반복
+  a.addEventListener('timeupdate', ()=>{
+    if(a.currentTime >= E || a.currentTime < S) a.currentTime = S;
   });
+
+  // 끝나거나 멈췄을 때 다시 재생
+  a.addEventListener('ended', startBGM);
+  a.addEventListener('pause', ()=>{
+    // 짜잔 효과음 등 외부에서 pause 된 게 아닐 때만 재개
+    if(!a._intentionalPause) setTimeout(()=>{ if(a.paused) a.play().catch(()=>{}); }, 50);
+  });
+
+  // 즉시 재생 시도
+  function tryPlay(){
+    startBGM();
+    // 첫 시도 이벤트 제거
+    document.removeEventListener('click',     tryPlay);
+    document.removeEventListener('touchstart', tryPlay);
+    document.removeEventListener('keydown',    tryPlay);
+  }
+
+  // 자동재생 시도, 실패 시 아무 인터랙션에서 재생
+  startBGM();
+  document.addEventListener('click',      tryPlay);
+  document.addEventListener('touchstart', tryPlay);
+  document.addEventListener('keydown',    tryPlay);
 })();
 
 // ── 상품 관리 ──
@@ -607,10 +631,13 @@ async function slotReveal(picked, prize, drawIndex, randInfo, maxNum){
   const lastItem = drum.querySelector(`.slot-item[data-idx="${STRIP}"]`);
   if(lastItem) lastItem.classList.add('locked');
 
-  // 짜잔 효과음
+  // 짜잔 효과음 (BGM 20% 볼륨 다운 → 효과음 종료 후 복구)
   const tada = document.getElementById('sfxTada');
+  const bgm  = document.getElementById('bgm');
   tada.currentTime = 0;
+  bgm.volume = 0.2;
   tada.play().catch(()=>{});
+  tada.onended = () => { bgm.volume = 1.0; };
 
   flash();
   spawnParticles();
