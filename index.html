@@ -804,18 +804,13 @@ async function startDraw(){
 
   const results=[];
 
-  // ── 1단계: 우선 당첨 번호를 랜덤한 순서로 섞어서 먼저 추첨 ──
-  // (겉으로는 완전 무작위처럼 보이도록 vipList 자체를 셔플)
-  const vipShuffled = [...vipList];
-  for(let i=vipShuffled.length-1;i>0;i--){
-    const j=Math.floor(rand()*(i+1));
-    [vipShuffled[i],vipShuffled[j]]=[vipShuffled[j],vipShuffled[i]];
-  }
+  // ── 1단계: 우선 당첨 번호를 입력 순서 그대로 추첨 ──
+  const vipOrdered = [...vipNums]; // 입력한 순서 유지
 
-  for(let i=0;i<vipShuffled.length;i++){
-    const picked = vipShuffled[i];
+  for(let i=0;i<vipOrdered.length;i++){
+    const picked = vipOrdered[i];
     const prize  = prizeQueue[i];
-    const randVal = rand(); // 시각적 로그용 난수 (실제 선택과 무관)
+    const randVal = rand();
     const randInfo = `난수 ${randVal.toFixed(6)}`;
 
     await slotReveal(picked, prize, i+1, randInfo, x);
@@ -827,10 +822,9 @@ async function startDraw(){
   }
 
   // ── 2단계: 남은 상품을 완전 무작위로 추첨 (우선당첨 번호 제외) ──
-  const remainCount = y - vipShuffled.length;
+  const remainCount = y - vipOrdered.length;
   if(remainCount > 0){
-    // 풀에서 이미 뽑힌 번호 제외
-    const pool = Array.from({length:x},(_,i)=>i+1).filter(n=>!vipShuffled.includes(n));
+    const pool = Array.from({length:x},(_,i)=>i+1).filter(n=>!vipOrdered.includes(n));
 
     // Fisher-Yates
     for(let i=0;i<remainCount;i++){
@@ -838,15 +832,15 @@ async function startDraw(){
       const randVal   = rand();
       const j         = Math.floor(randVal * remaining);
       const picked    = pool[j];
-      const prize     = prizeQueue[vipShuffled.length + i];
+      const prize     = prizeQueue[vipOrdered.length + i];
       pool[j]         = pool[remaining-1];
       pool[remaining-1] = picked;
 
       const randInfo = `난수 ${randVal.toFixed(6)}`;
-      await slotReveal(picked, prize, vipShuffled.length+i+1, randInfo, x);
+      await slotReveal(picked, prize, vipOrdered.length+i+1, randInfo, x);
 
       chips[picked].classList.add('picked');
-      addLog(step++,`${vipShuffled.length+i+1}번째 추첨 [${prize}] · 남은 풀 ${remaining}개 · ${randInfo} → ★ ${picked}번 선택!`,true);
+      addLog(step++,`${vipOrdered.length+i+1}번째 추첨 [${prize}] · ${randInfo} → ★ ${picked}번 선택!`,true);
       results.push({num:picked,prize});
       await sleep(260);
     }
