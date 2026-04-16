@@ -554,7 +554,7 @@ function removeVip(n){
 function renderVipTags(){
   const container = document.getElementById('vipTags');
   const bar       = document.getElementById('vipCountBar');
-  container.innerHTML = vipNums.sort((a,b)=>a-b).map(n=>
+  container.innerHTML = vipNums.map(n=>
     `<div class="vip-tag">${n}<button onclick="removeVip(${n})" title="제거">×</button></div>`
   ).join('');
   const prizes = getPrizes();
