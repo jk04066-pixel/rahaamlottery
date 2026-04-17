@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>라함 공식 추첨 시스템</title>
+<title>공개 추첨 시스템</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -816,7 +816,7 @@ async function startDraw(){
     await slotReveal(picked, prize, i+1, randInfo, x);
 
     chips[picked].classList.add('picked');
-    addLog(step++,`${i+1}번째 추첨 [${prize}] · ★ ${picked}번 선택!`,true);
+    addLog(step++,`${i+1}번째 추첨 [${prize}] · ${randInfo} → ★ ${picked}번 선택!`,true);
     results.push({num:picked,prize});
     await sleep(260);
   }
