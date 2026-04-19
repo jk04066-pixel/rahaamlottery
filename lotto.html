@@ -398,6 +398,7 @@
   <div class="vip-section">
     <div class="vip-header">
       <div class="vip-header-title">⭐ 무조건 당첨 번호</div>
+      <button class="vip-btn-add" onclick="shuffleVip()" id="vipShuffleBtn" style="display:none">🔀 순서 섞기</button>
     </div>
     <div class="vip-desc">
       활동 우수자 등 무조건 당첨되어야 할 번호를 입력하세요.<br>
@@ -551,9 +552,18 @@ function removeVip(n){
   renderVipTags();
 }
 
+function shuffleVip(){
+  for(let i=vipNums.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [vipNums[i],vipNums[j]]=[vipNums[j],vipNums[i]];
+  }
+  renderVipTags();
+}
+
 function renderVipTags(){
   const container = document.getElementById('vipTags');
   const bar       = document.getElementById('vipCountBar');
+  const shuffleBtn= document.getElementById('vipShuffleBtn');
   container.innerHTML = vipNums.map(n=>
     `<div class="vip-tag">${n}<button onclick="removeVip(${n})" title="제거">×</button></div>`
   ).join('');
@@ -561,10 +571,12 @@ function renderVipTags(){
   const total  = prizes.reduce((s,p)=>s+p.qty,0);
   if(vipNums.length > 0){
     bar.style.display = 'block';
+    shuffleBtn.style.display = vipNums.length > 1 ? '' : 'none';
     document.getElementById('vipCount').textContent  = vipNums.length;
     document.getElementById('vipRemain').textContent = Math.max(0, total - vipNums.length);
   } else {
     bar.style.display = 'none';
+    shuffleBtn.style.display = 'none';
   }
 }
 
