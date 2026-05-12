@@ -806,7 +806,6 @@ async function startDraw(){
   addSysLog(step++,`추첨 시작 · 범위: 1 ~ ${x} · 총 ${y}명`);
   addSysLog(step++,`시드(Seed): ${seed}  (타임스탬프 기반)`);
   addSysLog(step++,`알고리즘: Fisher-Yates Shuffle (편향 없는 무작위)`);
-  if(vipList.length) addSysLog(step++,`우선 당첨 번호: ${vipList.join(', ')}  (${vipList.length}명)`);
   prizes.forEach((p,i)=>addSysLog(step++,`상품 ${i+1}: ${p.name}  ×  ${p.qty}개`));
   await sleep(200);
 
